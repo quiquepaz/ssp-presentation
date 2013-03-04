@@ -106,7 +106,7 @@
 
 \begin{frame}{LAMP Stack \& MySql}
     \begin{columns}
-        \begin{column}[c]{0.65\textwidth}
+        \begin{column}[c]{0.6\textwidth}
             \begin{itemize}
                 \item Not all developers are DB experts
                 \item Difficult to shard the databases
@@ -117,15 +117,15 @@
                 \item \dots
             \end{itemize}
         \end{column}
-        \begin{column}[c]{0.35\textwidth}
-            \includegraphics[width=\textwidth]{images/oldstorageusage.png}
+        \begin{column}[c]{0.4\textwidth}
+            \includegraphics[width=0.9\textwidth]{images/oldstorageusage.png}
         \end{column}
     \end{columns}
 \end{frame}
 
 \begin{frame}{Our Ambition}
     \begin{columns}
-        \begin{column}[c]{0.65\textwidth}
+        \begin{column}[c]{0.6\textwidth}
             \begin{itemize}
                 \item Transparent sharding layer
                 \item Sharding based on data ownership
@@ -137,8 +137,8 @@
                 \item Ability to scale geographically
             \end{itemize}
         \end{column}
-        \begin{column}[c]{0.35\textwidth}
-            \includegraphics[width=\textwidth]{images/newstorageusage.png}
+        \begin{column}[c]{0.4\textwidth}
+            \includegraphics[width=0.9\textwidth]{images/newstorageusage.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -186,7 +186,7 @@
 \begin{frame}{Optimistic Operations}
     \begin{itemize}
         \item Speed > Consistency
-        \item Losing some updates is case of crash is affordable
+        \item Losing some updates in case of crash is affordable
         \item Destructive operations act first on cache and eventually on disk
         \item No warranties of eventual consistency upon crashes
             \begin{itemize}
@@ -342,7 +342,7 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{One API to rule them All}
+\begin{frame}{One API To Rule Them All}
     \begin{itemize}
         \item ``Don't care where it is, just want my data!!!''
         \pause
