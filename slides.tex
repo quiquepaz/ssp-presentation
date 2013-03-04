@@ -57,7 +57,7 @@
                 \item Testing Enthusiast
                 \item Development Process Caretaker
                 % \item Triumph Rider
-                % TODO Picture with the bike
+                % XXX Picture with the bike
             \end{itemize}
         \end{column}
     \end{columns}
@@ -105,56 +105,43 @@
 \subsection{Motivation}
 
 \begin{frame}{LAMP Stack \& MySql}
-    \begin{itemize}
-        \item Not all developers are DB experts
-        \item Difficult to shard the databases
-        \item Security
-        \item Performance
-        \item Caching
-        \item \dots
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Our Ambition}
     \begin{columns}
-        \begin{column}[c]{0.1\textwidth}
+        \begin{column}[c]{0.65\textwidth}
+            \begin{itemize}
+                \item Not all developers are DB experts
+                \item Difficult to shard the databases
+                \item Storage model all over the place
+                \item Security
+                \item Performance
+                \item Caching
+                \item \dots
+            \end{itemize}
         \end{column}
-        \begin{column}[c]{0.9\textwidth}
-            \includegraphics[width=0.8\textwidth]{images/storageusage.png}
+        \begin{column}[c]{0.35\textwidth}
+            \includegraphics[width=\textwidth]{images/oldstorageusage.png}
         \end{column}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Wish List}
-    \begin{itemize}
-        \item Transparent sharding layer
-        \item Scalable applications on top of sharding data
-        \item High Availability
-        \item Centralized caching layer
-        \item Storage engine agnostic
-        \item Allow changes to storage layer without affecting business (versioning)
-        \item Ability to scale geographically
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{One API to rule them All}
-    \begin{itemize}
-        \item ``Don't care where it is, just want my data!!!''
-        \pause
-        \begin{columns}
-            \begin{column}[c]{0.55\textwidth}
-                    \begin{itemize}
-                        \item \href{http://piqi.org}{PIQI}
-                        \item Native erlang (+ Protocol Buffers)
-                        \item HTTP + JSON
-                        \item HTTP + Protocol Buffers
-                    \end{itemize}
-            \end{column}
-            \begin{column}[c]{0.45\textwidth}
-                \includegraphics[width=\textwidth]{images/piqi.png}
-            \end{column}
-        \end{columns}
-    \end{itemize}
+\begin{frame}{Our Ambition}
+    % XXX View Sascha's notes
+    \begin{columns}
+        \begin{column}[c]{0.65\textwidth}
+            \begin{itemize}
+                \item Transparent sharding layer
+                \item Sharding based on data ownership
+                \item High Availability
+                \item Centralized caching layer
+                \item Storage engine agnostic
+                \item Strict data model defined in one place
+                \item Changing storage shouldn't affect business
+                \item Ability to scale geographically
+            \end{itemize}
+        \end{column}
+        \begin{column}[c]{0.35\textwidth}
+            \includegraphics[width=\textwidth]{images/newstorageusage.png}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \section{System Properties}
@@ -176,27 +163,24 @@
 
 \begin{frame}{A Key-Value Store With Schema}
     \begin{itemize}
-        \item \textbf{Buckets}:
+        \item \textbf{Buckets}
             \begin{itemize}
-                \item Are largely generated OTP applications
-                \item Expose a clear interface
+                \item Largely generated OTP applications
+                \item Offer a CRUD-like interface (with filters)
             \end{itemize}
-        \item All data is identified by a \textbf{GID}
-        \item GID types for data owners: users \& games
-        \item Buckets can use different data storage engines:
+        \item \textbf{GID}s identify the data owner
+            \begin{itemize}
+                \item user
+                \item game
+            \end{itemize}
+        \item Buckets can use different storage engines:
             \begin{itemize}
                 \item Several MySql tables in different databases
                 \item Just a binary storage (SWIFT)
                 \item \dots
             \end{itemize}
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{A Key-Value Store With Schema}
-    \begin{itemize}
-        \item Buckets offer a CRUD-like interface (with filters)
-        \item All data for a bucket/GID is cached locally
-        \item Requests are atomic per bucket/GID combination
+        \item Data for a bucket/GID is cached
+        \item Requests can be atomic per bucket/GID
     \end{itemize}
 \end{frame}
 
@@ -233,32 +217,41 @@
 }
 
 \begin{frame}{System Components}
-    % XXX Maybe picture of the ring?
-    \begin{itemize}
-        \item The \textbf{lookup} application must run in every SSP node
-        \item A \textbf{hashing ring} relates GID ranges with \textbf{pipeline factory} (PF) PIDs
-        \item Buckets in a node register in the lookup application
-        \item There can be several PFs per bucket/node
-        \item The hashing ring is a distributed mnesia table:
+    \begin{columns}
+        \begin{column}[c]{0.6\textwidth}
             \begin{itemize}
-                \item ram\_copies
-                \item dirty reads
-                \item transactional writes
+                \item \textbf{lookup} application \& lookup \textbf{hashing ring}
+                \item \textbf{Buckets} register their \textbf{PF}s in the local lookup application
+                \item The hashing ring is a distributed mnesia table:
+                    \begin{itemize}
+                        \item ram\_copies
+                        \item dirty reads
+                        \item transactional writes
+                    \end{itemize}
             \end{itemize}
-    \end{itemize}
+        \end{column}
+        \begin{column}[c]{0.4\textwidth}
+            \includegraphics[height=0.7\textheight]{images/components.png}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \begin{frame}{Tracing Pessimistic Operations}
-    \begin{enumerate}
-        \item A random SSP node receives a request for a bucket/GID
-        \item The node uses the lookup service to locate a PF at any node
-        \item The requested operation is encoded by the remote PF
-        \item The remote PF queues the operation in a pipeline for the given GID
-    \end{enumerate}
-\end{frame}
-
-\begin{frame}{A Closer Look}
-% TODO Sequence diagram overview of system behavior (pessimistic insert)
+    \begin{columns}
+        \begin{column}[c]{0.6\textwidth}
+            \begin{enumerate}
+                \item Random SSP node receives request for bucket/GID
+                \item Node uses local lookup to find the PF
+                \item PF receives the original request
+                \item PF builds the job to be executed
+                \item If none, PF creates a pipeline for GID
+                \item PF queues the operation in pipeline for GID
+            \end{enumerate}
+        \end{column}
+        \begin{column}[c]{0.4\textwidth}
+            \includegraphics[width=\textwidth]{images/tracingpessimistic.png}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \begin{frame}{Wait a minute\dots}
@@ -266,7 +259,7 @@
         \begin{column}[c]{0.05\textwidth}
         \end{column}
         \begin{column}[c]{0.3\textwidth}
-            \includegraphics[width=\textwidth]{images/slow.png}
+            \includegraphics[width=0.8\textwidth]{images/slow.png}
         \end{column}
         \begin{column}[c]{0.65\textwidth}
             \begin{itemize}
@@ -289,8 +282,8 @@
         \pause
         \item Advantages
             \begin{itemize}
-                \item Scales without global locks
-                \item Easy multi-database consistency
+                \item No need for storage engines to support global locks
+                \item A bucket can combine several engines
             \end{itemize}
         \pause
         \item Requests to most GIDs (users) are evenly distributed
@@ -299,51 +292,76 @@
 
 \subsection{Versions, Shards \& Migration}
 
+\begin{frame}{Code Versions}
+    \begin{itemize}
+        \item Code versions of a bucket determine the output seen by the clients
+        \item Clients must include the bucket definition in order to use an SSP bucket
+        \item Different code versions can work together
+            \begin{itemize}
+                \item Encoding/decoding all input/output
+                \item Changes are introduced as optional
+                \item Optional input/output slowly turned mandatory
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
 \begin{frame}{Schema Versions}
     \begin{itemize}
-        \item A bucket is versioned
         \item Schema Versions determine allowed operations and storage(s)
-        \item 1 or 2 versions of a bucket are allowed at the time
+        \item Client is not aware of them
+        \item Max 2 versions of a bucket at the time
+        \item Schema version can be changed at bucket/GID level
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Shards}
     \begin{itemize}
         \item Useful for partitioning big blocks of data
+        \item Shard points to the physical location of the data
         \item Sharding rules are bucket specific. Default is GID \% Shards
-        \item SSP stores and caches versions and shards information internally
+        \item bucket/GID combinations can be migrated between shards
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Working With Versions \& Shards}
-    \begin{table}{
-        \small
-        \begin{tabular}{|l|l|l|l|l|l|}
-            \hline
-            \textbf{Bucket}&\textbf{GID}&\textbf{Version}&\textbf{Shard}&\textbf{Mirror}&\textbf{Previous}\\
-            \hline
-            profile&288234639967094968&1&3&1&0\\
-            \dots&\dots&\dots&\dots&\dots&\dots\\
-            \hline
-        \end{tabular}}
-    \end{table}
     \begin{columns}
-        \begin{column}[c]{0.33\textwidth}
-            \begin{itemize}
-                \item Migrations
-            \end{itemize}
+        \begin{column}[c]{0.5\textwidth}
+            \begin{enumerate}
+                \item \emph{insert(Bucket, Gid, Value)}
+                \item \emph{insert(Gid, Value)}
+                \item \emph{get\_version\_and\_shard(Bucket, Gid)}
+                \item \emph{\{v2, Shard1\}}
+                \item \emph{build\_job(insert, Gid, Shard1)}
+                \item \emph{\{ok, InsertJob\}}
+                \item \emph{\{ok, InsertJob\}}
+                \item \emph{queue(InsertJob)}
+            \end{enumerate}
         \end{column}
-        \begin{column}[c]{0.33\textwidth}
-            \begin{itemize}
-                \item Read Previous
-            \end{itemize}
-        \end{column}
-        \begin{column}[c]{0.33\textwidth}
-            \begin{itemize}
-                \item Mirror Write
-            \end{itemize}
+        \begin{column}[c]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{images/versionsandshards.png}
         \end{column}
     \end{columns}
+\end{frame}
+
+\begin{frame}{One API to rule them All}
+    \begin{itemize}
+        \item ``Don't care where it is, just want my data!!!''
+        \pause
+        \begin{columns}
+            \begin{column}[c]{0.6\textwidth}
+                    \begin{itemize}
+                        \item \href{http://piqi.org}{PIQI}
+                        \item Native erlang (+ Protocol Buffers)
+                        \item HTTP + JSON
+                        \item HTTP + Protocol Buffers
+                    \end{itemize}
+            \end{column}
+            \begin{column}[c]{0.4\textwidth}
+                \includegraphics[width=0.8\textwidth]{images/piqi.png}
+            \end{column}
+        \end{columns}
+        \item Protection against code versions!
+    \end{itemize}
 \end{frame}
 
 \section{Worldwide}
@@ -356,11 +374,32 @@
 
 \subsection{Scaling Datacenters}
 
-\begin{frame}{Operating Globally}
-    \begin{center}
-        \includegraphics[width=0.7\textwidth]{images/worldmapdc.png}
-    \end{center}
+\begin{frame}{Masters \& Satellites}
+    \begin{columns}
+        \begin{column}[c]{0.6\textwidth}
+            % XXX Better examples, not the traveller but opening a Satellite in an area to speed up
+            \begin{itemize}
+                \item Master Datacenters
+                    \begin{itemize}
+                        \item Have persistent storage
+                        \item Can own GIDs
+                        \item GIDs can be migrated between Master DCs
+                    \end{itemize}
+                \item Satellite Datacenters
+                    \begin{itemize}
+                        \item Can't own GIDs
+                        \item Don't have persistent storage
+                        \item Easy to setup and decommission
+                    \end{itemize}
+            \end{itemize}
+        \end{column}
+        \begin{column}[c]{0.4\textwidth}
+            \includegraphics[width=\textwidth]{images/worldmapdc.png}
+        \end{column}
+    \end{columns}
 \end{frame}
+
+% TODO Explaination about seting up a new DC
 
 \begin{frame}{Working With Multiple Datacenters}
     \begin{columns}
@@ -374,28 +413,10 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Masters \& Satellites}
-    \begin{itemize}
-        \item Master Datacenters
-            \begin{itemize}
-                \item Have persistent storage
-                \item Can own GIDs
-                \item GIDs ownership can be migrated from one Master DC to another
-            \end{itemize}
-        \pause
-        \item Satellite Datacenters
-            \begin{itemize}
-                \item Can't own GIDs
-                \item Don't have persistent storage
-                \item Easy to setup and decommission
-            \end{itemize}
-    \end{itemize}
-\end{frame}
-
 \subsection{Disaster Scenarios}
 
 {
-\usebackgroundtemplate{\includegraphics[width=\paperwidth]{images/prestige2.png}}
+\usebackgroundtemplate{\includegraphics[width=\paperwidth]{images/prestige.png}}
 \begin{frame}{Disaster Scenarios}
 \end{frame}
 }
@@ -423,12 +444,11 @@
         \item Integrating restricted search capabilities
         \item Testing the WAN protocol for inter DC communication
         \item More buckets to go live in H1 2013
-        \item Next Master DC coming on H2 2013
+        \item Satellite DCs coming on H2 2013
     \end{itemize}
 \end{frame}
 
 \subsection{Contributions}
-% XXX Add Motiejus' basho bench
 \begin{frame}{What We've Used}
     \begin{itemize}
         \item Emysql
@@ -451,6 +471,10 @@
                 \item (*) xref support
             \end{itemize}
         \item Piqi
+        \item BashoBench
+            \begin{itemize}
+                \item (+) Several tests on the same plot support
+            \end{itemize}
     \end{itemize}
 \end{frame}
 
