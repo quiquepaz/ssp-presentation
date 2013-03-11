@@ -53,11 +53,9 @@
         \end{column}
         \begin{column}[c]{0.7\textwidth}
             \begin{itemize}
-                \item Passionate Erlang Developer
-                \item Testing Enthusiast
-                \item Development Process Caretaker
-                % \item Triumph Rider
-                % XXX Picture with the bike
+                \item Passionate Erlang developer
+                \item Testing enthusiast
+                \item Love beautiful code!
             \end{itemize}
         \end{column}
     \end{columns}
@@ -125,20 +123,20 @@
 
 \begin{frame}{Our Ambition}
     \begin{columns}
-        \begin{column}[c]{0.6\textwidth}
+        \begin{column}[c]{0.5\textwidth}
             \begin{itemize}
                 \item Transparent sharding layer
-                \item Sharding based on data ownership
-                \item High Availability
+                \item Sharding on data ownership
+                \item High availability
                 \item Centralized caching layer
                 \item Storage engine agnostic
-                \item Strict data model defined in one place
-                \item Changing storage shouldn't affect business
-                \item Ability to scale geographically
+                \item One strict data model
+                \item Transparent storage changes
+                \item Scaling geographically
             \end{itemize}
         \end{column}
-        \begin{column}[c]{0.4\textwidth}
-            \includegraphics[width=0.9\textwidth]{images/newstorageusage.png}
+        \begin{column}[c]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{images/newstorageusage.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -149,9 +147,9 @@
 
 \begin{frame}{Mindset}
     \begin{itemize}
-        \item Always available
-        \item No global locks
-        \item Inconsistencies are the norm
+        \item Be Always available
+        \item Avoid global locks
+        \item Embrace inconsistencies
             \begin{itemize}
                 \item Hardware breaks down (power failures)
                 \item Version mismatches (upgrading system not atomic)
@@ -167,7 +165,7 @@
                 \item Largely generated OTP applications
                 \item Offer a CRUD-like interface (with filters)
             \end{itemize}
-        \item \textbf{GID}s identify the data owner
+        \item \textbf{GID}s (64 bits) identify the data owner
             \begin{itemize}
                 \item user
                 \item game
@@ -187,7 +185,7 @@
     \begin{itemize}
         \item Speed > Consistency
         \item Losing some updates in case of crash is affordable
-        \item Destructive operations act first on cache and eventually on disk
+        \item Act first on cache and then on disk
         \item No warranties of eventual consistency upon crashes
             \begin{itemize}
                 \item i.e. Activity feeds
@@ -200,7 +198,7 @@
     \begin{itemize}
         \item Consistency is key and confirmation is required
         \item Dealing with critical data
-        \item Destructive operations act on disk and, upon success, on cache
+        \item Persist data and, upon success, update cache
             \begin{itemize}
                 \item i.e. Payments
                 \item i.e. Personal Information
@@ -217,37 +215,39 @@
 
 \begin{frame}{System Components}
     \begin{columns}
-        \begin{column}[c]{0.6\textwidth}
+        \begin{column}[c]{0.5\textwidth}
             \begin{itemize}
-                \item \textbf{lookup} application \& lookup \textbf{hashing ring}
-                \item \textbf{Buckets} register their \textbf{PF}s in the local lookup application
-                \item The hashing ring is a distributed mnesia table:
-                    \begin{itemize}
-                        \item ram\_copies
-                        \item dirty reads
-                        \item transactional writes
-                    \end{itemize}
+                \item \textbf{lookup} application in all nodes.\\
+                      Uses a \textbf{hashing ring} (mnesia):
+                            \begin{itemize}
+                                \item replicated in all nodes
+                                \item ram\_copies
+                                \item dirty reads
+                                \item transactional writes
+                            \end{itemize}
+                \item \textbf{Buckets} register \textbf{PF}s in lookup
             \end{itemize}
         \end{column}
-        \begin{column}[c]{0.4\textwidth}
-            \includegraphics[height=0.7\textheight]{images/components.png}
+        \begin{column}[c]{0.5\textwidth}
+            \includegraphics[height=0.75\textheight]{images/components.png}
         \end{column}
     \end{columns}
 \end{frame}
 
 \begin{frame}{Tracing Pessimistic Operations}
     \begin{columns}
-        \begin{column}[c]{0.6\textwidth}
+        \begin{column}[c]{0.5\textwidth}
+                    %TODO hat for the pow, remove actor
             \begin{enumerate}
-                \item Random SSP node receives request for bucket/GID
-                \item Node uses local lookup to find the PF
-                \item PF receives the original request
-                \item PF builds the job to be executed
-                \item If none, PF creates a pipeline for GID
-                \item PF queues the operation in pipeline for GID
+                \item Bucket/GID request in random SSP node
+                \item Local lookup to find the PF
+                \item PF receives request
+                \item PF builds job for the request
+                \item If none, PF creates Pipeline for GID
+                \item PF queues operation in Pipeline
             \end{enumerate}
         \end{column}
-        \begin{column}[c]{0.4\textwidth}
+        \begin{column}[c]{0.5\textwidth}
             \includegraphics[width=\textwidth]{images/tracingpessimistic.png}
         \end{column}
     \end{columns}
@@ -255,31 +255,29 @@
 
 \begin{frame}{Wait a minute\dots}
     \begin{columns}
-        \begin{column}[c]{0.05\textwidth}
-        \end{column}
-        \begin{column}[c]{0.3\textwidth}
-            \includegraphics[width=0.8\textwidth]{images/slow.png}
-        \end{column}
-        \begin{column}[c]{0.65\textwidth}
+        \begin{column}[c]{0.5\textwidth}
             \begin{itemize}
                 \item ``Why do we need pipelines?''
                 \item ``Sequential == Bottleneck !!!''
                 \item ``Don't you guys know Erlang is about \textbf{parallelizing} work?''
             \end{itemize}
         \end{column}
+        \begin{column}[c]{0.5\textwidth}
+            \includegraphics[width=0.8\textwidth]{images/slow.png}
+        \end{column}
     \end{columns}
 \end{frame}
 
 \begin{frame}{About Pipelines}
     \begin{itemize}
-        \item Drawbacks
+        \item \textbf{CONS}
             \begin{itemize}
-                \item For hotspots sequential (read) access is bad indeed.\\
-                    i.e. Retrieving game data for popular games
-                \item Optimization: read from cache outside the pipeline
+                \item Sequential (read) access for hotspots\\
+                    i.e. Popular games
+                \item Optimization: read from cache
             \end{itemize}
         \pause
-        \item Advantages
+        \item \textbf{PROS}
             \begin{itemize}
                 \item No need for storage engines to support global locks
                 \item A bucket can combine several engines
@@ -289,20 +287,7 @@
     \end{itemize}
 \end{frame}
 
-\subsection{Versions, Shards \& Migration}
-
-\begin{frame}{Code Versions}
-    \begin{itemize}
-        \item Code versions of a bucket determine the output seen by the clients
-        \item Clients must include the bucket definition in order to use an SSP bucket
-        \item Different code versions can work together
-            \begin{itemize}
-                \item Encoding/decoding all input/output
-                \item Changes are introduced as optional
-                \item Optional input/output slowly turned mandatory
-            \end{itemize}
-    \end{itemize}
-\end{frame}
+\subsection{Versions \& Shards}
 
 \begin{frame}{Schema Versions}
     \begin{itemize}
@@ -346,20 +331,19 @@
     \begin{itemize}
         \item ``Don't care where it is, just want my data!!!''
         \pause
+        \item \href{http://piqi.org}{PIQI} helps with the API
         \begin{columns}
-            \begin{column}[c]{0.6\textwidth}
-                    \begin{itemize}
-                        \item \href{http://piqi.org}{PIQI}
-                        \item Native erlang (+ Protocol Buffers)
-                        \item HTTP + JSON
-                        \item HTTP + Protocol Buffers
-                    \end{itemize}
+            \begin{column}[c]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{images/piqi.png}
             \end{column}
-            \begin{column}[c]{0.4\textwidth}
-                \includegraphics[width=0.8\textwidth]{images/piqi.png}
+            \begin{column}[c]{0.6\textwidth}
+                \begin{itemize}
+                    \item Erlang client, bucket definition \& encoding/decoding
+                    \item HTTP + JSON
+                    \item HTTP + Protocol Buffers
+                \end{itemize}
             \end{column}
         \end{columns}
-        \item Protection against code versions!
     \end{itemize}
 \end{frame}
 
@@ -385,7 +369,6 @@
                     \end{itemize}
                 \item Satellite Datacenters
                     \begin{itemize}
-                        \item Can't own GIDs
                         \item Don't have persistent storage
                         \item Easy to setup and decommission
                     \end{itemize}
@@ -393,18 +376,6 @@
         \end{column}
         \begin{column}[c]{0.4\textwidth}
             \includegraphics[width=\textwidth]{images/worldmapdc.png}
-        \end{column}
-    \end{columns}
-\end{frame}
-
-\begin{frame}{Working With Multiple Datacenters}
-    \begin{columns}
-        \begin{column}[c]{0.1\textwidth}
-        \end{column}
-        \begin{column}[c]{0.8\textwidth}
-            \includegraphics[width=0.8\textwidth]{images/multidcops.png}
-        \end{column}
-        \begin{column}[c]{0.1\textwidth}
         \end{column}
     \end{columns}
 \end{frame}
@@ -425,6 +396,18 @@
     \begin{center}
         \includegraphics[width=0.7\textwidth]{images/scalingdcs3.png}
     \end{center}
+\end{frame}
+
+\begin{frame}{Working With Multiple Datacenters}
+    \begin{columns}
+        \begin{column}[c]{0.1\textwidth}
+        \end{column}
+        \begin{column}[c]{0.8\textwidth}
+            \includegraphics[width=0.8\textwidth]{images/multidcops.png}
+        \end{column}
+        \begin{column}[c]{0.1\textwidth}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \subsection{Disaster Scenarios}
