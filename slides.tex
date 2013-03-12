@@ -104,7 +104,7 @@
 
 \begin{frame}{LAMP Stack \& MySql}
     \begin{columns}
-        \begin{column}[c]{0.6\textwidth}
+        \begin{column}[c]{0.5\textwidth}
             \begin{itemize}
                 \item Not all developers are DB experts
                 \item Difficult to shard the databases
@@ -115,7 +115,7 @@
                 \item \dots
             \end{itemize}
         \end{column}
-        \begin{column}[c]{0.4\textwidth}
+        \begin{column}[c]{0.5\textwidth}
             \includegraphics[width=0.9\textwidth]{images/oldstorageusage.png}
         \end{column}
     \end{columns}
@@ -149,6 +149,7 @@
     \begin{itemize}
         \item Be Always available
         \item Avoid global locks
+        \item Accept change as the only constant
         \item Embrace inconsistencies
             \begin{itemize}
                 \item Hardware breaks down (power failures)
@@ -189,7 +190,7 @@
         \item No warranties of eventual consistency upon crashes
             \begin{itemize}
                 \item i.e. Activity feeds
-                \item i.e. Popular Games List
+                \item i.e. Popular games list
             \end{itemize}
     \end{itemize}
 \end{frame}
@@ -201,7 +202,7 @@
         \item Persist data and, upon success, update cache
             \begin{itemize}
                 \item i.e. Payments
-                \item i.e. Personal Information
+                \item i.e. Personal information
             \end{itemize}
     \end{itemize}
 \end{frame}
@@ -225,7 +226,8 @@
                                 \item dirty reads
                                 \item transactional writes
                             \end{itemize}
-                \item \textbf{Buckets} register \textbf{PF}s in lookup
+                \item \textbf{Buckets} have Pipeline Factories
+                \item Buckets register \textbf{PF}s in lookup
             \end{itemize}
         \end{column}
         \begin{column}[c]{0.5\textwidth}
@@ -237,13 +239,12 @@
 \begin{frame}{Tracing Pessimistic Operations}
     \begin{columns}
         \begin{column}[c]{0.5\textwidth}
-                    %TODO hat for the pow, remove actor
             \begin{enumerate}
-                \item Bucket/GID request in random SSP node
-                \item Local lookup to find the PF
+                \item Bucket/GID request in random node
+                \item Local lookup to find a PF
                 \item PF receives request
-                \item PF builds job for the request
-                \item If none, PF creates Pipeline for GID
+                \item PF builds job
+                \item If needed, PF creates Pipeline for GID
                 \item PF queues operation in Pipeline
             \end{enumerate}
         \end{column}
@@ -446,29 +447,31 @@
 \end{frame}
 
 \subsection{Contributions}
+% TODO Links!!
+        % \item \href{http://piqi.org}{PIQI} helps with the API
 \begin{frame}{What We've Used}
     \begin{itemize}
-        \item Emysql
+        \item \href{http://eonblast.github.com/Emysql}{Emysql}
             \begin{itemize}
                 \item (+) multi-database transaction support
                 \item (*) multi-timezone support
             \end{itemize}
-        \item Eep0018/Jiffy
-        \item Estatsd
-        \item PropEr
+        \item \href{http://github.com/davisp/eep0018}{Eep0018}/\href{http://github.com/davisp/jiffy}{Jiffy}
+        \item \href{http://github.com/RJ/estatsd}{Estatsd}
+        \item \href{http://github.com/manopapad/proper}{PropEr}
             \begin{itemize}
                 \item (*) utf8 generator
             \end{itemize}
-        \item Poolboy
-        \item Lager
-        \item Rebar
+        \item \href{http://github.com/devinus/poolboy}{Poolboy}
+        \item \href{http://github.com/basho/lager}{Lager}
+        \item \href{http://github.com/basho/rebar}{Rebar}
             \begin{itemize}
                 \item (*) semantic versioning, i.e. [">=1.3.1", "<2.0.0"]
                 \item (*) shared dependencies
-                \item (*) xref support
+                \item (*) xref fixes
             \end{itemize}
-        \item Piqi
-        \item BashoBench
+        \item \href{http://github.com/alavrik/piqi}{Piqi}
+        \item \href{http://github.com/basho/basho\_bench}{BashoBench}
             \begin{itemize}
                 \item (+) Several tests on the same plot support
             \end{itemize}
