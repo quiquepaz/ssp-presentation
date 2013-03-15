@@ -1,4 +1,4 @@
-\documentclass[aspectratio=169]{beamer}
+\documentclass[aspectratio=43]{beamer}
 
 \mode<presentation>
 {
@@ -65,7 +65,7 @@
     \begin{itemize}
        \item Gaming Platform
        \item Serving data to 190+ countries world-wide
-       \item 180+ million unique users per month
+       \item 200+ million unique users per month
        \item Multiple Platforms: Desktop, Mobile Native \& Web
        \item 300+ employees
        \item Offices in The Netherlands \& China
@@ -84,10 +84,10 @@
 \begin{frame}{Games}
     \begin{columns}
         \begin{column}[c]{0.5\textwidth}
-            \includegraphics[height=0.6\textheight]{images/sarah.png}
+            \includegraphics[width=\textwidth]{images/sarah.png}
         \end{column}
         \begin{column}[c]{0.5\textwidth}
-            \includegraphics[height=0.6\textheight]{images/galaxylife.png}
+            \includegraphics[width=\textwidth]{images/galaxylife.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -95,7 +95,7 @@
 \section{Another Storage}
 
 {
-\usebackgroundtemplate{\includegraphics[width=\paperwidth]{images/anotherstorage.png}}
+\usebackgroundtemplate{\includegraphics[height=\paperheight]{images/anotherstorage.png}}
 \begin{frame}{Another Storage}
 \end{frame}
 }
@@ -147,7 +147,7 @@
 
 \begin{frame}{Mindset}
     \begin{itemize}
-        \item Be Always available
+        \item Be always available
         \item Avoid global locks
         \item Accept change as the only constant
         \item Embrace inconsistencies
@@ -171,7 +171,7 @@
                 \item user
                 \item game
             \end{itemize}
-        \item Buckets can use different storage engines:
+        \item Buckets can use different \textbf{storage engines}
             \begin{itemize}
                 \item Several MySql tables in different databases
                 \item Just a binary storage (SWIFT)
@@ -231,7 +231,7 @@
             \end{itemize}
         \end{column}
         \begin{column}[c]{0.5\textwidth}
-            \includegraphics[height=0.75\textheight]{images/components.png}
+            \includegraphics[width=0.9\textwidth]{images/components.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -240,11 +240,11 @@
     \begin{columns}
         \begin{column}[c]{0.5\textwidth}
             \begin{enumerate}
-                \item Bucket/GID request in random node
+                \item Bucket/GID request in a node
                 \item Local lookup to find a PF
                 \item PF receives request
                 \item PF builds job
-                \item If needed, PF creates Pipeline for GID
+                \item PF ensures Pipeline for GID
                 \item PF queues operation in Pipeline
             \end{enumerate}
         \end{column}
@@ -275,7 +275,7 @@
             \begin{itemize}
                 \item Sequential (read) access for hotspots\\
                     i.e. Popular games
-                \item Optimization: read from cache
+                \item Optimization: read from SSP cache in PF
             \end{itemize}
         \pause
         \item \textbf{PROS}
@@ -294,7 +294,7 @@
     \begin{itemize}
         \item Schema Versions determine allowed operations and storage(s)
         \item Client is not aware of them
-        \item Max 2 versions of a bucket at the time
+        \item Max 2 schema versions of a bucket at the time
         \item Schema version can be changed at bucket/GID level
     \end{itemize}
 \end{frame}
@@ -314,7 +314,7 @@
             \begin{enumerate}
                 \item \emph{insert(Bucket, Gid, Value)}
                 \item \emph{insert(Gid, Value)}
-                \item \emph{get\_version\_and\_shard(Bucket, Gid)}
+                \item \emph{get\_vs(Bucket, Gid)}
                 \item \emph{\{v2, Shard1\}}
                 \item \emph{build\_job(insert, Gid, Shard1)}
                 \item \emph{\{ok, InsertJob\}}
@@ -339,7 +339,7 @@
             \end{column}
             \begin{column}[c]{0.6\textwidth}
                 \begin{itemize}
-                    \item Erlang client, bucket definition \& encoding/decoding
+                    \item Erlang client + Protocol Buffers
                     \item HTTP + JSON
                     \item HTTP + Protocol Buffers
                 \end{itemize}
@@ -351,7 +351,7 @@
 \section{Worldwide}
 
 {
-\usebackgroundtemplate{\includegraphics[width=\paperwidth]{images/worldwide.png}}
+\usebackgroundtemplate{\includegraphics[height=\paperheight]{images/worldwide.png}}
 \begin{frame}{Worlwide}
 \end{frame}
 }
@@ -372,6 +372,7 @@
                     \begin{itemize}
                         \item Don't have persistent storage
                         \item Easy to setup and decommission
+                        \item Virtual/Cloud-based
                     \end{itemize}
             \end{itemize}
         \end{column}
@@ -414,7 +415,7 @@
 \subsection{Disaster Scenarios}
 
 {
-\usebackgroundtemplate{\includegraphics[width=\paperwidth]{images/prestige.png}}
+\usebackgroundtemplate{\includegraphics[height=\paperheight]{images/prestige.png}}
 \begin{frame}{Disaster Scenarios}
 \end{frame}
 }
@@ -478,10 +479,10 @@
 \begin{frame}{Questions?}
     \begin{columns}
         \begin{column}[c]{0.5\textwidth}
-            \includegraphics[height=0.9\textheight]{images/holycow.png}
+            \includegraphics[width=0.8\textwidth]{images/holycow.png}
         \end{column}
         \begin{column}[c]{0.5\textwidth}
-            \includegraphics[height=0.8\textheight]{images/questions.png}
+            \includegraphics[width=0.6\textwidth]{images/questions.png}
         \end{column}
     \end{columns}
 \end{frame}
